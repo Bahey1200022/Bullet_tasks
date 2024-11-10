@@ -1,0 +1,234 @@
+ls vs find
+
+find :Find files or directories under a directory tree, recursively.
+
+ls : List directory contents.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------
+sys call time breakdown :
+ls:
+bin                cdrom  home   lib64              media  proc  sbin                srv       tmp
+bin.usr-is-merged  dev    lib    lib.usr-is-merged  mnt    root  sbin.usr-is-merged  swap.img  usr
+boot               etc    lib32  lost+found         opt    run   snap                sys       var
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 37.50    0.000420         420         1           execve
+ 26.61    0.000298          16        18           mmap
+  8.39    0.000094          31         3           write
+  7.32    0.000082          41         2           getdents64
+  5.27    0.000059           8         7           openat
+  3.84    0.000043           4         9           close
+  3.30    0.000037           4         8           fstat
+  2.23    0.000025           5         5           read
+  1.61    0.000018           9         2         2 statfs
+  1.25    0.000014           7         2           pread64
+  1.07    0.000012          12         1           munmap
+  0.98    0.000011           5         2         2 access
+  0.62    0.000007           2         3           brk
+  0.00    0.000000           0         5           mprotect
+  0.00    0.000000           0         2           ioctl
+  0.00    0.000000           0         1           arch_prctl
+  0.00    0.000000           0         1           set_tid_address
+  0.00    0.000000           0         1           set_robust_list
+  0.00    0.000000           0         1           prlimit64
+  0.00    0.000000           0         1           getrandom
+  0.00    0.000000           0         1           rseq
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001120          14        76         4 total
+
+
+find :
+
+strace -c find task22 -type f -name "*.txt"
+task22/ls_find.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 34.21    0.000534          28        19           mmap
+ 19.22    0.000300          13        22        12 openat
+  7.75    0.000121           8        14           close
+  7.75    0.000121          24         5           mprotect
+  6.21    0.000097          13         7           read
+  4.23    0.000066           6        10           fstat
+  2.31    0.000036          18         2           getdents64
+  2.18    0.000034          34         1           munmap
+  2.11    0.000033          16         2         2 statfs
+  1.79    0.000028           7         4           fcntl
+  1.41    0.000022          11         2           pread64
+  1.41    0.000022          11         2           newfstatat
+  1.35    0.000021          21         1           write
+  1.28    0.000020           6         3           brk
+  1.15    0.000018           9         2           ioctl
+  0.77    0.000012           6         2         2 access
+  0.64    0.000010          10         1           fstatfs
+  0.58    0.000009           9         1           getrandom
+  0.51    0.000008           8         1           futex
+  0.51    0.000008           8         1           prlimit64
+  0.45    0.000007           7         1           uname
+  0.45    0.000007           7         1           fchdir
+  0.45    0.000007           7         1           arch_prctl
+  0.45    0.000007           7         1           set_robust_list
+  0.45    0.000007           7         1           rseq
+  0.38    0.000006           6         1           set_tid_address
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001561          14       109        16 total
+
+
+#####################################################################################################################
+#####################################################################################################################
+#####################################################################################################################
+
+Time measurements :
+
+ls :
+real    0m0.015s
+user    0m0.005s
+sys     0m0.003s
+
+
+find :
+time find task22 -type f -name "*.txt"
+task22/ls_find.txt
+
+real    0m0.009s
+user    0m0.002s
+sys     0m0.007s
+
+
+#####################################################################################################################
+#####################################################################################################################
+#####################################################################################################################
+
+kernel stacks :
+
+ls :
+
+strace -e trace=file ls
+execve("/usr/bin/ls", ["ls"], 0x7ffe42653e10 /* 62 vars */) = 0
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libselinux.so.1", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpcre2-8.so.0", O_RDONLY|O_CLOEXEC) = 3
+statfs("/sys/fs/selinux", 0x7ffd82b60820) = -1 ENOENT (No such file or directory)
+statfs("/selinux", 0x7ffd82b60820)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/proc/filesystems", O_RDONLY|O_CLOEXEC) = 3
+access("/etc/selinux/config", F_OK)     = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, ".", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3
+task1  task2  task22
++++ exited with 0 +++
+
+
+#####################################################################################################################
+
+
+ strace -e trace=memory  ls
+brk(NULL)                               = 0x61afa62c4000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x791ab03ed000
+mmap(NULL, 58739, PROT_READ, MAP_PRIVATE, 3, 0) = 0x791ab03de000
+mmap(NULL, 181960, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x791ab03b1000
+mmap(0x791ab03b7000, 118784, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x6000) = 0x791ab03b7000
+mmap(0x791ab03d4000, 24576, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x23000) = 0x791ab03d4000
+mmap(0x791ab03da000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x29000) = 0x791ab03da000
+mmap(0x791ab03dc000, 5832, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x791ab03dc000
+mmap(NULL, 2170256, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x791ab0000000
+mmap(0x791ab0028000, 1605632, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x791ab0028000
+mmap(0x791ab01b0000, 323584, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0x791ab01b0000
+mmap(0x791ab01ff000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1fe000) = 0x791ab01ff000
+mmap(0x791ab0205000, 52624, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x791ab0205000
+mmap(NULL, 627472, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x791ab0317000
+mmap(0x791ab0319000, 450560, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x791ab0319000
+mmap(0x791ab0387000, 163840, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x70000) = 0x791ab0387000
+mmap(0x791ab03af000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x97000) = 0x791ab03af000
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x791ab0314000
+mprotect(0x791ab01ff000, 16384, PROT_READ) = 0
+mprotect(0x791ab03af000, 4096, PROT_READ) = 0
+mprotect(0x791ab03da000, 4096, PROT_READ) = 0
+mprotect(0x61afa610b000, 8192, PROT_READ) = 0
+mprotect(0x791ab0425000, 8192, PROT_READ) = 0
+munmap(0x791ab03de000, 58739)           = 0
+brk(NULL)                               = 0x61afa62c4000
+brk(0x61afa62e5000)                     = 0x61afa62e5000
+mmap(NULL, 14596880, PROT_READ, MAP_PRIVATE, 3, 0) = 0x791aaf200000
+task1  task2  task22
++++ exited with 0 +++
+#####################################################################################################################
+
+find:
+
+strace -e trace=file find task22 -type f -name "*.txt"
+execve("/usr/bin/find", ["find", "task22", "-type", "f", "-name", "*.txt"], 0x7ffc03c281a8 /* 62 vars */) = 0
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libselinux.so.1", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpcre2-8.so.0", O_RDONLY|O_CLOEXEC) = 3
+statfs("/sys/fs/selinux", 0x7ffc99e1c4e0) = -1 ENOENT (No such file or directory)
+statfs("/selinux", 0x7ffc99e1c4e0)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/proc/filesystems", O_RDONLY|O_CLOEXEC) = 3
+access("/etc/selinux/config", F_OK)     = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, ".", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 4
+openat(AT_FDCWD, "/usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache", O_RDONLY|O_CLOEXEC) = 4
+openat(AT_FDCWD, "/usr/share/locale/locale.alias", O_RDONLY|O_CLOEXEC) = 4
+openat(AT_FDCWD, "/usr/share/locale/en_US.UTF-8/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en_US.utf8/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en_US/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en.UTF-8/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en.utf8/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US.UTF-8/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US.utf8/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en.UTF-8/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en.utf8/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en/LC_MESSAGES/findutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+newfstatat(AT_FDCWD, "task22", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
+openat(AT_FDCWD, "task22", O_RDONLY|O_NOCTTY|O_NONBLOCK|O_NOFOLLOW|O_CLOEXEC|O_DIRECTORY) = 4
+newfstatat(AT_FDCWD, "task22", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
+task22/ls_find.txt
++++ exited with 0 +++
+#####################################################################################################################
+
+strace -e trace=memory find task22 -type f -name "*.txt"
+brk(NULL)                               = 0x5fd219d65000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x745d53596000
+mmap(NULL, 58739, PROT_READ, MAP_PRIVATE, 3, 0) = 0x745d53587000
+mmap(NULL, 181960, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x745d5355a000
+mmap(0x745d53560000, 118784, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x6000) = 0x745d53560000
+mmap(0x745d5357d000, 24576, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x23000) = 0x745d5357d000
+mmap(0x745d53583000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x29000) = 0x745d53583000
+mmap(0x745d53585000, 5832, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x745d53585000
+mmap(NULL, 2170256, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x745d53200000
+mmap(0x745d53228000, 1605632, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x745d53228000
+mmap(0x745d533b0000, 323584, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0x745d533b0000
+mmap(0x745d533ff000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1fe000) = 0x745d533ff000
+mmap(0x745d53405000, 52624, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x745d53405000
+mmap(NULL, 627472, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x745d534c0000
+mmap(0x745d534c2000, 450560, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x745d534c2000
+mmap(0x745d53530000, 163840, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x70000) = 0x745d53530000
+mmap(0x745d53558000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x97000) = 0x745d53558000
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x745d534bd000
+mprotect(0x745d533ff000, 16384, PROT_READ) = 0
+mprotect(0x745d53558000, 4096, PROT_READ) = 0
+mprotect(0x745d53583000, 4096, PROT_READ) = 0
+mprotect(0x5fd2182e4000, 8192, PROT_READ) = 0
+mprotect(0x745d535ce000, 8192, PROT_READ) = 0
+munmap(0x745d53587000, 58739)           = 0
+brk(NULL)                               = 0x5fd219d65000
+brk(0x5fd219d86000)                     = 0x5fd219d86000
+mmap(NULL, 14596880, PROT_READ, MAP_PRIVATE, 4, 0) = 0x745d52400000
+mmap(NULL, 27028, PROT_READ, MAP_SHARED, 4, 0) = 0x745d5358f000
+task22/ls_find.txt
++++ exited with 0 +++
+
+##################################################################################################################################3
+
+#####################################################################################################################
+#####################################################################################################################
+#####################################################################################################################
+Performance Evaluation:
+
+
+ls less sys calls yet find is more faster
