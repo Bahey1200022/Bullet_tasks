@@ -1,0 +1,192 @@
+sort vs uniq 
+
+sort : Sort lines of text files.
+
+uniq : Output the unique lines from a input or file.
+Since it does not detect repeated lines unless they are adjacent, we need to sort them first.
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+ time measurements
+
+ time sort task22/example.txt | uniq
+
+aaaa
+qqqq
+
+real    0m0.011s
+user    0m0.005s
+sys     0m0.007s
+
+
+///////////////////////////////////
+
+time sort task22/example.txt
+
+
+aaaa
+qqqq
+qqqq
+
+real    0m0.008s
+user    0m0.002s
+sys     0m0.006s
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+sys call breakdown :
+
+strace -c  sort task22/example.txt
+
+
+aaaa
+qqqq
+qqqq
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ------------------
+ 43.34    0.000699         699         1           execve
+ 23.12    0.000373          26        14           mmap
+  5.77    0.000093          18         5           openat
+  3.91    0.000063           2        23           rt_sigaction
+  2.91    0.000047           6         7           fstat
+  2.85    0.000046           9         5           write
+  2.60    0.000042           6         7           close
+  2.11    0.000034           8         4           read
+  1.92    0.000031          15         2         1 access
+  1.74    0.000028           7         4           mprotect
+  1.49    0.000024           8         3           brk
+  1.12    0.000018          18         1           munmap
+  1.05    0.000017           8         2           pread64
+  0.87    0.000014           3         4           prlimit64
+  0.68    0.000011           5         2           sysinfo
+  0.56    0.000009           9         1           arch_prctl
+  0.56    0.000009           9         1           set_robust_list
+  0.50    0.000008           8         1           newfstatat
+  0.37    0.000006           6         1           set_tid_address
+  0.37    0.000006           6         1           rseq
+  0.31    0.000005           5         1           sched_getaffinity
+  0.31    0.000005           5         1           getrandom
+  0.25    0.000004           4         1           lseek
+  0.25    0.000004           4         1           fcntl
+  0.25    0.000004           4         1           getgid
+  0.25    0.000004           4         1           fadvise64
+  0.19    0.000003           3         1           getuid
+  0.19    0.000003           3         1           geteuid
+  0.19    0.000003           3         1           getegid
+------ ----------- ----------- --------- --------- ------------------
+100.00    0.001613          16        98         1 total
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////
+
+strace -c sort task22/example.txt | uniq
+
+aaaa
+qqqq
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ------------------
+ 44.29    0.000562         562         1           execve
+ 16.63    0.000211          15        14           mmap
+  6.30    0.000080          20         4           mprotect
+  5.44    0.000069           3        23           rt_sigaction
+  5.04    0.000064           9         7           close
+  5.04    0.000064          12         5           openat
+  2.52    0.000032           4         7           fstat
+  1.89    0.000024           6         4           read
+  1.73    0.000022          22         1           munmap
+  1.34    0.000017           5         3           brk
+  1.26    0.000016           8         2         1 access
+  0.95    0.000012           6         2           pread64
+  0.95    0.000012           3         4           prlimit64
+  0.71    0.000009           9         1           write
+  0.71    0.000009           4         2           sysinfo
+  0.55    0.000007           7         1           set_tid_address
+  0.55    0.000007           7         1           newfstatat
+  0.47    0.000006           6         1           arch_prctl
+  0.47    0.000006           6         1           set_robust_list
+  0.47    0.000006           6         1           rseq
+  0.39    0.000005           5         1           sched_getaffinity
+  0.39    0.000005           5         1           getrandom
+  0.32    0.000004           4         1           lseek
+  0.32    0.000004           4         1           fcntl
+  0.32    0.000004           4         1           getegid
+  0.24    0.000003           3         1           getuid
+  0.24    0.000003           3         1           getgid
+  0.24    0.000003           3         1           geteuid
+  0.24    0.000003           3         1           fadvise64
+------ ----------- ----------- --------- --------- ------------------
+100.00    0.001269          13        94         1 total
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+kernel stacks :
+
+uniq :
+
+trace -e trace=memory  sort task22/example.txt | uniq
+brk(NULL)                               = 0x60e7793da000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7ab5c8162000
+mmap(NULL, 58739, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7ab5c8153000
+mmap(NULL, 5319632, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7ab5c7c00000
+mmap(0x7ab5c7cb3000, 3354624, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0xb3000) = 0x7ab5c7cb3000
+mmap(0x7ab5c7fe6000, 831488, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x3e6000) = 0x7ab5c7fe6000
+mmap(0x7ab5c80b1000, 389120, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x4b0000) = 0x7ab5c80b1000
+mmap(0x7ab5c8110000, 11216, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7ab5c8110000
+mmap(NULL, 2170256, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7ab5c7800000
+mmap(0x7ab5c7828000, 1605632, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x7ab5c7828000
+mmap(0x7ab5c79b0000, 323584, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0x7ab5c79b0000
+mmap(0x7ab5c79ff000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1fe000) = 0x7ab5c79ff000
+mmap(0x7ab5c7a05000, 52624, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7ab5c7a05000
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7ab5c8150000
+mprotect(0x7ab5c79ff000, 16384, PROT_READ) = 0
+mprotect(0x7ab5c80b1000, 376832, PROT_READ) = 0
+mprotect(0x60e77909b000, 4096, PROT_READ) = 0
+mprotect(0x7ab5c819a000, 8192, PROT_READ) = 0
+munmap(0x7ab5c8153000, 58739)           = 0
+brk(NULL)                               = 0x60e7793da000
+brk(0x60e7793fb000)                     = 0x60e7793fb000
+mmap(NULL, 14596880, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7ab5c6a00000
+
+aaaa
+qqqq
++++ exited with 0 +++
+
+/////////////////////////////////////////
+
+
+strace -e trace=file  sort task22/example.txt | uniq
+execve("/usr/bin/sort", ["sort", "task22/example.txt"], 0x7ffcddbab478 /* 62 vars */) = 0
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libcrypto.so.3", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+newfstatat(AT_FDCWD, "task22/example.txt", {st_mode=S_IFREG|0664, st_size=16, ...}, 0) = 0
+access("task22/example.txt", R_OK)      = 0
+openat(AT_FDCWD, "task22/example.txt", O_RDONLY|O_CLOEXEC) = 3
+
+aaaa
+qqqq
++++ exited with 0 +++
+
+
+sort :
+similar to uniq memory and file 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+uniq has an extra func but uses the sort command
