@@ -1,0 +1,218 @@
+diff vs cmp :
+diff :
+Compare files and directories.
+
+cmp :
+
+Compare two files byte by byte.
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+sys call breakdown :
+
+diff :
+
+
+strace -c diff  task1/task1_cpp_basics.cpp task2/task1_cpp_basics.cpp
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 41.84    0.000572         572         1           execve
+ 21.14    0.000289          28        10           mmap
+  8.27    0.000113           5        19        12 openat
+  5.27    0.000072          24         3           mprotect
+  3.58    0.000049           6         8           close
+  3.37    0.000046          15         3           brk
+  3.29    0.000045          11         4           fstat
+  3.07    0.000042          21         2           munmap
+  2.78    0.000038           4         9           read
+  1.76    0.000024          12         2           pread64
+  1.24    0.000017          17         1         1 access
+  0.95    0.000013          13         1           getrandom
+  0.73    0.000010          10         1           arch_prctl
+  0.73    0.000010          10         1           prlimit64
+  0.66    0.000009           9         1           set_tid_address
+  0.66    0.000009           9         1           set_robust_list
+  0.66    0.000009           9         1           rseq
+  0.00    0.000000           0         1           lseek
+  0.00    0.000000           0         2           rt_sigaction
+  0.00    0.000000           0         3           fcntl
+  0.00    0.000000           0         1           sigaltstack
+  0.00    0.000000           0         2           newfstatat
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001367          17        77        13 total
+
+
+cmp :
+
+strace -c cmp task1/task1_cpp_basics.cpp task2/buggy.cpp
+task1/task1_cpp_basics.cpp task2/buggy.cpp differ: byte 21, line 2
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 27.00    0.000398          20        19        12 openat
+ 18.11    0.000267          26        10           mmap
+ 11.26    0.000166          20         8           read
+  6.65    0.000098          12         8           close
+  6.31    0.000093          11         8           fstat
+  5.09    0.000075          37         2           munmap
+  5.02    0.000074          24         3           mprotect
+  3.60    0.000053          17         3           brk
+  2.71    0.000040          40         1           execve
+  1.97    0.000029           9         3           fcntl
+  1.70    0.000025          25         1           write
+  1.42    0.000021          10         2           pread64
+  1.22    0.000018          18         1         1 access
+  1.22    0.000018          18         1           newfstatat
+  1.15    0.000017           8         2           rt_sigaction
+  0.88    0.000013          13         1           getrandom
+  0.81    0.000012          12         1           sigaltstack
+  0.75    0.000011          11         1           prlimit64
+  0.68    0.000010          10         1           arch_prctl
+  0.61    0.000009           9         1           lseek
+  0.61    0.000009           9         1           set_tid_address
+  0.61    0.000009           9         1           set_robust_list
+  0.61    0.000009           9         1           rseq
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001474          18        80        13 total
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+time
+
+cmp :
+
+time  cmp task1/task1_cpp_basics.cpp task2/buggy.cpp
+task1/task1_cpp_basics.cpp task2/buggy.cpp differ: byte 21, line 2
+
+real    0m0.009s
+user    0m0.003s
+sys     0m0.006s
+
+diff:
+
+time  diff  task1/task1_cpp_basics.cpp task2/task1_cpp_basics
+.cpp
+
+real    0m0.012s
+user    0m0.005s
+sys     0m0.007s
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+kernel stack :
+
+diff : 
+memory :
+
+strace -e trace=memory  diff  task1/task1_cpp_basics.cpp task
+2/task1_cpp_basics.cpp
+brk(NULL)                               = 0x654ad2893000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7cb058040000
+mmap(NULL, 58739, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7cb058031000
+mmap(NULL, 2170256, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7cb057e00000
+mmap(0x7cb057e28000, 1605632, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x7cb057e28000
+mmap(0x7cb057fb0000, 323584, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0x7cb057fb0000
+mmap(0x7cb057fff000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1fe000) = 0x7cb057fff000
+mmap(0x7cb058005000, 52624, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7cb058005000
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7cb05802e000
+mprotect(0x7cb057fff000, 16384, PROT_READ) = 0
+mprotect(0x654ad167a000, 8192, PROT_READ) = 0
+mprotect(0x7cb058078000, 8192, PROT_READ) = 0
+munmap(0x7cb058031000, 58739)           = 0
+brk(NULL)                               = 0x654ad2893000
+brk(0x654ad28b4000)                     = 0x654ad28b4000
+mmap(NULL, 14596880, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7cb057000000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7cb05803e000
+munmap(0x7cb05803e000, 8192)            = 0
++++ exited with 0 +++
+
+
+file :
+
+strace -e trace=file  diff  task1/task1_cpp_basics.cpp task2/
+task1_cpp_basics.cpp
+execve("/usr/bin/diff", ["diff", "task1/task1_cpp_basics.cpp", "task2/task1_cpp_basics.cpp"], 0x7fff1cd54820 /* 62 vars */) = 0
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/usr/share/locale/locale.alias", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/usr/share/locale/en_US.UTF-8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en_US.utf8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en_US/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en.UTF-8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en.utf8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US.UTF-8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US.utf8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en.UTF-8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en.utf8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/proc/self/maps", O_RDONLY) = 3
+newfstatat(AT_FDCWD, "task1/task1_cpp_basics.cpp", {st_mode=S_IFREG|0775, st_size=1946, ...}, 0) = 0
+newfstatat(AT_FDCWD, "task2/task1_cpp_basics.cpp", {st_mode=S_IFREG|0775, st_size=1946, ...}, 0) = 0
+openat(AT_FDCWD, "task1/task1_cpp_basics.cpp", O_RDONLY) = 3
+openat(AT_FDCWD, "task2/task1_cpp_basics.cpp", O_RDONLY) = 4
++++ exited with 0 +++
+
+
+cmp:
+
+file:
+strace -e trace=file  cmp task1/task1_cpp_basics.cpp task2/bu
+ggy.cpp
+execve("/usr/bin/cmp", ["cmp", "task1/task1_cpp_basics.cpp", "task2/buggy.cpp"], 0x7ffcf02a0970 /* 62 vars */) = 0
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/usr/share/locale/locale.alias", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/usr/share/locale/en_US.UTF-8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en_US.utf8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en_US/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en.UTF-8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en.utf8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale/en/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US.UTF-8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US.utf8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en_US/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en.UTF-8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en.utf8/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/share/locale-langpack/en/LC_MESSAGES/diffutils.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/proc/self/maps", O_RDONLY) = 3
+openat(AT_FDCWD, "task1/task1_cpp_basics.cpp", O_RDONLY) = 3
+openat(AT_FDCWD, "task2/buggy.cpp", O_RDONLY) = 4
+newfstatat(AT_FDCWD, "/dev/null", {st_mode=S_IFCHR|0666, st_rdev=makedev(0x1, 0x3), ...}, 0) = 0
+task1/task1_cpp_basics.cpp task2/buggy.cpp differ: byte 21, line 2
++++ exited with 1 +++
+
+memory :
+strace -e trace=memory  cmp task1/task1_cpp_basics.cpp task2/
+buggy.cpp
+brk(NULL)                               = 0x6466b0763000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x764b438ec000
+mmap(NULL, 58739, PROT_READ, MAP_PRIVATE, 3, 0) = 0x764b438dd000
+mmap(NULL, 2170256, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x764b43600000
+mmap(0x764b43628000, 1605632, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x764b43628000
+mmap(0x764b437b0000, 323584, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0x764b437b0000
+mmap(0x764b437ff000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1fe000) = 0x764b437ff000
+mmap(0x764b43805000, 52624, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x764b43805000
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x764b438da000
+mprotect(0x764b437ff000, 16384, PROT_READ) = 0
+mprotect(0x6466af518000, 4096, PROT_READ) = 0
+mprotect(0x764b43924000, 8192, PROT_READ) = 0
+munmap(0x764b438dd000, 58739)           = 0
+brk(NULL)                               = 0x6466b0763000
+brk(0x6466b0784000)                     = 0x6466b0784000
+mmap(NULL, 14596880, PROT_READ, MAP_PRIVATE, 3, 0) = 0x764b42800000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x764b438ea000
+munmap(0x764b438ea000, 8192)            = 0
+task1/task1_cpp_basics.cpp task2/buggy.cpp differ: byte 21, line 2
++++ exited with 1 +++
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cmp compares byte by byte 
+
+
+diff :what to do to make the files identical
