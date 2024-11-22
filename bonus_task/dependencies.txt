@@ -1,0 +1,1 @@
+class1.o: class1.cpp class1.hpp class2.hpp
